@@ -1,0 +1,20 @@
+
+check if interface is available
+if not, prompt to start airmon-ng
+once started, lock on to specified channel
+start master sniffer
+    determine/display communicating access points and stations (if an AP is not communicating with anyone it will not be
+      displayed. Use the aircrack-ng suite if you want all signals. This is to simply sniff communication between devices
+      and access points)
+    start sniffer (with filter) for each pair?
+    Each pair must hold the following (continuously updated) information:
+        SSID of access point
+        Time of last communication
+        Is it one-sided? (Can you only hear the access point, the device, or both?)
+        Number of packets sent back and forth between the two. (of course, some may be retransmissions)
+        Is it encrypted? (Most likely yes)
+        For WPA and WPA2:
+            Are the SSID and password for the access point known? (stored in the database)?
+            Have sufficient EAPOL packets been captured for decryption?
+
+
