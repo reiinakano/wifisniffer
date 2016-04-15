@@ -13,8 +13,13 @@ start master sniffer
         Is it one-sided? (Can you only hear the access point, the device, or both?)
         Number of packets sent back and forth between the two. (of course, some may be retransmissions)
         Is it encrypted? (Most likely yes)
-        For WPA and WPA2:
-            Are the SSID and password for the access point known? (stored in the database)?
-            Have sufficient EAPOL packets been captured for decryption?
+        Is it readable?
+            For WPA and WPA2:
+                Are the SSID and password for the access point known? (stored in the database)?
+                Have sufficient EAPOL packets been captured for decryption? If not, give an option to run aireplay and
+                  deauth the user
+            For WEP:
+                Is the WEP key known?
+
 
 
