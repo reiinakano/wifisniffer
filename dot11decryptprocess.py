@@ -1,6 +1,7 @@
 # This file contains a class for spawning and killing a new dot11decrypt process
 import subprocess32
 
+
 class Dot11DecryptSubprocess():
     def __init__(self, interface, decryption_key):
         self.proc, self.tap = self.start_dot11decrypt(interface, decryption_key)
@@ -15,7 +16,7 @@ class Dot11DecryptSubprocess():
             return proc, read[14:].rstrip()
         else:
             print read
-            return None, None
+            raise Exception
 
     def kill(self):
         print "Killing dot11decrypt subprocess and closing tap interface"

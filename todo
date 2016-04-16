@@ -1,0 +1,5 @@
+having a function that will take a packet, determine if it is encrypted, determine if it is decryptable using
+    any information we have (SSID Password pair/EAPOL handshakes), and return the decrypted packet will make our lives
+    so much easier.
+
+    Anyone know how to decrypt WPA?

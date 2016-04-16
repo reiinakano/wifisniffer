@@ -8,19 +8,21 @@ start master sniffer in pyshark
       and access points)
 
     Each access point must hold the following information (not visible to user):
+        WEP or WPA?
         Are the SSID and password for the access point known? (stored in the database)?
             If so, start a dot11decryptprocess for that particular SSID and password pair (if not started already)
             If not, give user option to input password for the access point
+            A scapy sniffer will then be started to collect the decrypted packets.
 
     Each pair must hold the following (continuously updated) information:
-        Access point
+        Access point and whether password is known
         Time of last communication
         Is it one-sided? (Can you only hear the access point, the device, or both?)
         Number of packets sent back and forth between the two. (of course, some may be retransmissions)
-        What is the type of encryption?
-        Number of decrypted packets so far
-        If not, give an option to run aireplay and
-          deauth the user
+        Number of decrypted packets so far (time of last decryption)
+        If there are no decrypted packets and the password for the access point is known, the EAPOL handshake may not
+          have been captured yet. Provide a button to deauthenticate the user using aireplay-ng
 
+    The scapy sniffers will update the corresponding pair whenever they receive a decrypted packet.
 
 
