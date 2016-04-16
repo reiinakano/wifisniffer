@@ -1,4 +1,5 @@
-import pyshark, time, subprocess32, os
+import pyshark, time, os
+import dot11decryptprocess as d11
 
 def checkPrivilege():
     print "Checking system privileges..."
@@ -9,20 +10,6 @@ def checkPrivilege():
         raise Exception
 
 
-def start_dot11decrypt(interface, decryption_key): #starts and returns dot11decrypt subprocess and interface.
-    print "Starting new dot11decrypt subprocess on " + interface + " with key " + decryption_key
-    proc = subprocess32.Popen(['sudo', 'd11decrypt/build/dot11decrypt', interface, decryption_key], stdout=subprocess32.PIPE)
-    read = proc.stdout.readline()
-    if read[0:14] == "Using device: ":
-        print "Currently decrypting packets and releasing to " + read[14:]
-        print "Process number is " + str(proc.pid)
-        return proc, read[14:]
-    else:
-        print read
-
-def stop_dot11decrypt(proc, tap): #Kills tap interface
-    proc.kill()
-
 if __name__ == '__main__':
     #print("Start capture")
     #capture = pyshark.LiveCapture(interface="wlan0")
@@ -31,9 +18,8 @@ if __name__ == '__main__':
     #    print '----------------Just arrived: Packet number', i
     #    print packet
     #   i+=1
-    proc, tap = start_dot11decrypt("wlan0", "wpa:myssid:mypassword")
-    stop_dot11decrypt(proc, tap)
-    time.sleep(1)
+    decryptProcess = d11.Dot11DecryptSubprocess("wlan0", "wpa:myssid:mypassword")
+    decryptProcess.kill()
     #print proc
     #print proc.wait()
     #print proc.returncode
