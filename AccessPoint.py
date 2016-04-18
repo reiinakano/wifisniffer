@@ -70,6 +70,6 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
             pass
 
 if __name__ == "__main__":
-    AP = AccessPoint("wpa", "mySSID", "00:00:00:00:00:00")
+    AP = AccessPoint("wpa", "mySSID", "00:00:00:00:00:00", 1)
     AP.setPasswordToFile("myPassword")
     print "Interface is open: " + str(AP.openInterface)
