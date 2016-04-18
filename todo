@@ -3,3 +3,7 @@ having a function that will take a packet, determine if it is encrypted, determi
     so much easier.
 
     Anyone know how to decrypt WPA?
+
+dot11decrypt subprocess can't be killed without sudo privileges :/
+
+dot11decrypt parsing tap interface name from stdout could be improved. right now i'd say it's pretty ripe for failure in most cases

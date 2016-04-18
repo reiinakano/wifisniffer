@@ -3,10 +3,11 @@ import dot11decryptprocess as d11
 
 
 class AccessPoint(): # instantiating an access point checks to see if the password is saved in file 'savedAPs' and starts decryption subprocess
-    def __init__(self, encryption, SSID, MAC):
+    def __init__(self, encryption, SSID, MAC, channel):
         self.encryption = encryption # WEP or WPA
         self.SSID = SSID # SSID of accesspoint
         self.MAC = MAC # MAC address of access point
+        self.channel = channel
         self.decryptSubprocess = None
         self.openInterface = False
         self.password = self.getPasswordFromFile()
