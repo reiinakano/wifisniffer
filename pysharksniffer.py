@@ -59,6 +59,7 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
                     self.CommPairList[i].packet_to_AP_received()
                 self.lock.release()
                 print "Updated a pair in communicating pairs list"
+                self.CommPairList[i].pretty_print()
                 return True
         return False
 

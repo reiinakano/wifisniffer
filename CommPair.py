@@ -39,6 +39,12 @@ class CommunicatingPair():
     def decrypted_packet_received(self):
         self.decrypted_packets += 1
 
+    def pretty_print(self):
+        print "Communicating pair with AP MAC " + self.AP.MAC + " and station MAC " + self.stn_MAC
+        print "Time last received: " + self.time_last_received
+        print "Packets from AP: " + str(self.packets_from_AP)
+        print "Packets to AP:" + str(self.packets_to_AP)
+
 if __name__ == '__main__':
     access_point = AP.AccessPoint("wpa", "mySSID2", "10:20:30:40:50:60", 1)
     access_point.setPasswordToFile("mypassword2")
