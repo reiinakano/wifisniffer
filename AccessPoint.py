@@ -3,7 +3,7 @@ import dot11decryptprocess as d11
 
 
 class AccessPoint(): # instantiating an access point checks to see if the password is saved in file 'savedAPs' and starts decryption subprocess
-    def __init__(self, encryption, SSID, MAC, channel):
+    def __init__(self, encryption, MAC, channel, SSID=None):
         self.encryption = encryption # WEP or WPA
         self.SSID = SSID # SSID of accesspoint
         self.MAC = MAC # MAC address of access point
@@ -16,6 +16,9 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
 
     def getPasswordFromFile(self): # This method tries to get saved passkey from file and return it. returns None if failed
         try:
+            if self.SSID is None:
+                print "SSID not known. Cannot determine password."
+                return None
             print "Attempting to get AP from file 'savedAPs'..."
             f = open('savedAPs')
             for line in f.readlines():
@@ -38,6 +41,9 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
 
 
     def setPasswordToFile(self, passkey): # This method writes passkey to file and sets pass for the access point
+        if self.SSID is None:
+            print "SSID not known. Cannot save password."
+            return None
         self.password = passkey
         print "Set password to " + passkey
         print "Saving AP and password to file 'savedAPs'"
@@ -69,7 +75,18 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
             print "Failed to start interface"
             pass
 
+    def setName(self, name):
+        if name is None:
+            print "Input to setName cannot be 'None'"
+            return
+        if self.SSID:
+            print "Cannot change SSID of non-hidden network"
+            return
+        print "Set SSID to " + name
+        self.SSID = name
+
 if __name__ == "__main__":
-    AP = AccessPoint("wpa", "mySSID", "00:00:00:00:00:00", 1)
-    AP.setPasswordToFile("myPassword")
+    AP = AccessPoint("wpa", "00:00:00:00:00:00", 1)
+    AP.setName("mynewSSID")
+    AP.getPasswordFromFile()
     print "Interface is open: " + str(AP.openInterface)
