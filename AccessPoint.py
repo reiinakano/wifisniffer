@@ -3,7 +3,7 @@ import dot11decryptprocess as d11
 
 
 class AccessPoint(): # instantiating an access point checks to see if the password is saved in file 'savedAPs' and starts decryption subprocess
-    def __init__(self, encryption, MAC, channel, SSID=None):
+    def __init__(self, MAC, channel, SSID=None, encryption=None):
         self.encryption = encryption # WEP or WPA
         self.SSID = SSID # SSID of accesspoint
         self.MAC = MAC # MAC address of access point
@@ -66,8 +66,11 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
                 return
             if self.encryption == "wpa":
                 self.decryption_key = "wpa:" + self.SSID + ":" + self.password
-            else:
+            elif self.encryption == "wep":
                 self.decryption_key = "wep:" + self.MAC + ":" + self.password
+            else:
+                print "Encryption type not known yet. Be patient young Jedi"
+                return
             self.decryptSubprocess = d11.Dot11DecryptSubprocess("wlan0", self.decryption_key)
             print "Decrypting interface for " + self.SSID + " opened using passkey " + self.password
             self.openInterface = True
@@ -85,8 +88,14 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
         print "Set SSID to " + name
         self.SSID = name
 
+    def setEncryption(self, encryption):
+        print "Setting encryption to " + encryption
+        self.encryption = encryption
+
 if __name__ == "__main__":
-    AP = AccessPoint("wpa", "00:00:00:00:00:00", 1)
-    AP.setName("mynewSSID")
-    AP.getPasswordFromFile()
+    AP = AccessPoint("00:00:00:00:00:00", 1, "mySSID")
+    AP.setEncryption("wep")
+    #AP.setName("mynewSSID")
+    #AP.getPasswordFromFile()
+    AP.startInterface()
     print "Interface is open: " + str(AP.openInterface)

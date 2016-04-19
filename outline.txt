@@ -26,3 +26,17 @@ start master sniffer in pyshark
     The scapy sniffers will update the corresponding pair whenever they receive a decrypted packet.
 
 
+#print packet.highest_layer
+#print dir(packet.wlan)
+#print "Receiver address: " + packet.wlan.ra
+#print "Transmitter address: " + packet.wlan.ta
+#print "Destination address: " + packet.wlan.da
+#print "Source address: " + packet.wlan.sa
+#print "BSSID: " + packet.wlan.bssid
+#print packet.wlan.pretty_print()
+#print dir(packet)
+#print packet.sniff_timestamp
+#print packet.sniff_time
+#print packet.captured_length
+#print packet.layers
+#print packet.interface_captured
