@@ -1,10 +1,11 @@
-def test(a):
-    sub = a
-    sub[0] +=1
+import AccessPoint
+import CommPair
 
-if __name__ == '__main__':
-    list = [0]
-    test(list)
-    print list
-    test(list)
-    print list
+APList = []
+APList.append(AccessPoint.AccessPoint("22313", 1))
+APList.append(AccessPoint.AccessPoint("212114", 1))
+CommPairList = []
+CommPairList.append(CommPair.CommunicatingPair(APList[0], "sasa", 44))
+
+print CommPairList[0].AP == APList[0]
+print CommPairList[0].AP is APList[0]

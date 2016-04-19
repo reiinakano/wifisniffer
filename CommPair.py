@@ -12,6 +12,7 @@ class CommunicatingPair():
         self.decrypted_packets = 0
         self.packets_from_AP = 0
         self.packets_to_AP = 0
+        print "Instantiated communicating pair with AP MAC " + self.AP.MAC + " and station MAC " + self.stn_MAC
 
     def deauthenticate(self): # This method deauthenticates station MAC (using aireplay-ng) in order to try to capture the EAPOL handshake
         if self.AP.openInterface is False:

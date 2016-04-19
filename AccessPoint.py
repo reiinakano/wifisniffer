@@ -8,6 +8,7 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
         self.SSID = SSID # SSID of accesspoint
         self.MAC = MAC # MAC address of access point
         self.channel = channel
+        print "Instantiated AP with BSSID " + self.MAC + " at Channel " + str(self.channel)
         self.decryptSubprocess = None
         self.openInterface = False
         self.password = self.getPasswordFromFile()
