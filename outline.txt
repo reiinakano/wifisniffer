@@ -26,17 +26,19 @@ start master sniffer in pyshark
     The scapy sniffers will update the corresponding pair whenever they receive a decrypted packet.
 
 
-if packet.highest_layer == "DATA" or packet.highest_layer == "WLAN_MGT":
+            if packet.highest_layer == "DATA" or packet.highest_layer == "WLAN_MGT":
                 print packet.highest_layer
                 try:
                     print dir(packet.wlan_mgt)
-                    #print packet.wlan_mgt.pretty_print()
-                    print packet.wlan_mgt.rsn_gcs
-                    print packet.wlan_mgt.rsn_gcs_type
-                    print packet.wlan_mgt.rsn_gcs_oui
-                    print packet.wlan_mgt.rsn_pcs
-                    print packet.wlan_mgt.rsn_pcs_type
-                    print packet.wlan_mgt.rsn_pcs_list
+                    print packet.wlan_mgt.pretty_print()
+                    print packet.wlan_mgt.fixed_capabilities_privacy
+                    print packet.wlan_mgt.rsn_capabilities
+                    #print packet.wlan_mgt.rsn_gcs
+                    #print packet.wlan_mgt.rsn_gcs_type
+                    #rint packet.wlan_mgt.rsn_gcs_oui
+                    #print packet.wlan_mgt.rsn_pcs
+                    #print packet.wlan_mgt.rsn_pcs_type
+                    #print packet.wlan_mgt.rsn_pcs_list
                 except:
                     pass
                 print dir(packet.wlan)

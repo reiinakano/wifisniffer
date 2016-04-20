@@ -19,13 +19,14 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
             # first check what kind of packet we have. Data or WLAN_MGT?
             if packet.highest_layer == "DATA": # if packet is a data packet (remember, we're only getting communicating APs)
                 if self.inAPList(packet) is False: # If AP BSSID is not recognized, add it to APList. If already in list, do nothing
-                    self.APlist.append(AccessPoint.AccessPoint(packet.wlan.bssid, 1))
+                    self.APlist.append(AccessPoint.AccessPoint(packet.wlan.bssid, 11))
                     print "Added new AP in APList"
                 if self.inCommPairList(packet) is False:
                     self.lock.acquire()
                     self.append_new_comm_pair(packet)
                     self.lock.release()
                     print "Added new pair in CommPairList"
+
 
     def inAPList(self, packet): # checks to see if a WLAN frame's BSSID is in self.APlist
         for access_point in self.APlist:
@@ -40,10 +41,19 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
         print "Something wrong if you see this."
 
     def append_new_comm_pair(self, packet):
+        #print packet.wlan.sa
+        #print packet.wlan.da
+        #print packet.wlan.ta
+        #print packet.wlan.ra
+        #print packet.wlan.bssid
         self.index = self.getIndexinAPList(packet)
         if self.APlist[self.index].MAC == packet.wlan.sa:
             self.stn_MAC = packet.wlan.da
         elif self.APlist[self.index].MAC == packet.wlan.da:
+            self.stn_MAC = packet.wlan.sa
+        elif self.APlist[self.index].MAC == packet.wlan.ta:
+            self.stn_MAC = packet.wlan.da
+        elif self.APlist[self.index].MAC == packet.wlan.ra:
             self.stn_MAC = packet.wlan.sa
         self.CommPairList.append(CommPair.CommunicatingPair(self.APlist[self.index], self.stn_MAC, packet.sniff_timestamp))
 

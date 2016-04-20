@@ -7,3 +7,6 @@ having a function that will take a packet, determine if it is encrypted, determi
 dot11decrypt subprocess can't be killed without sudo privileges :/
 
 dot11decrypt parsing tap interface name from stdout could be improved. right now i'd say it's pretty ripe for failure in most cases
+
+currently looking for better code to determine type of encryption. right now my requirement to determine wpa is if it has RSN (which is only WPA2)
+    cause I don't see much WPA networks lol. then i say it uses WEP when it doesn't have RSN and AP can support WEP flag is set (yeah,stupid i know)
