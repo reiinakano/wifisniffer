@@ -41,7 +41,7 @@ class CommunicatingPair():
 
     def pretty_print(self):
         print "Communicating pair with AP MAC " + self.AP.MAC + " and station MAC " + self.stn_MAC
-        print "Time last received: " + self.time_last_received
+        print "Time last received: " + str(self.time_last_received)
         print "Packets from AP: " + str(self.packets_from_AP)
         print "Packets to AP:" + str(self.packets_to_AP)
 

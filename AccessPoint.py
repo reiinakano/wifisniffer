@@ -12,6 +12,7 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
         self.decryptSubprocess = None
         self.openInterface = False
         self.password = self.getPasswordFromFile()
+        self.passMightBeInFile = True # flag to state if there is a possibility that password is recoverable in file
         if self.password: # if password exists
             self.startInterface() # start the interface here
 
@@ -60,10 +61,20 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
         f.write(self.SSID + ":" + self.password + "\n")
         f.close()
 
-    def startInterface(self): # start dot11decrypt subprocess
+    def setPassword(self, passkey): # This method sets pass for AP without saving into file
+        if self.SSID is None:
+            print "SSID not know. Cannot set password"
+            return None
+        self.password = passkey
+        print "Set " + self.SSID + " password to " + self.password
+
+    def startInterface(self, interface): # start dot11decrypt subprocess
         try:
             if self.openInterface:
                 print "Interface is already open. Invalid call to startInterface()"
+                return
+            if self.password is None:
+                print "No password set yet. Can't start interface"
                 return
             if self.encryption == "wpa":
                 self.decryption_key = "wpa:" + self.SSID + ":" + self.password
@@ -72,10 +83,11 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
             else:
                 print "Encryption type not known yet. Be patient young Jedi"
                 return
-            self.decryptSubprocess = d11.Dot11DecryptSubprocess("wlan0", self.decryption_key)
+            self.decryptSubprocess = d11.Dot11DecryptSubprocess(interface, self.decryption_key)
             print "Decrypting interface for " + self.SSID + " opened using passkey " + self.password
             self.openInterface = True
-        except:
+        except Exception as e:
+            print e
             print "Failed to start interface"
             pass
 
@@ -86,10 +98,13 @@ class AccessPoint(): # instantiating an access point checks to see if the passwo
         if self.SSID:
             print "Cannot change SSID of non-hidden network"
             return
-        print "Set SSID to " + name
+        print "Set SSID of " + self.MAC + " to " + name
         self.SSID = name
 
     def setEncryption(self, encryption):
+        if self.encryption:
+            print "Encryption type is already set"
+            return
         print "Setting encryption to " + encryption
         self.encryption = encryption
 
@@ -98,5 +113,5 @@ if __name__ == "__main__":
     AP.setEncryption("wep")
     #AP.setName("mynewSSID")
     #AP.getPasswordFromFile()
-    AP.startInterface()
+    AP.startInterface("wlan1")
     print "Interface is open: " + str(AP.openInterface)
