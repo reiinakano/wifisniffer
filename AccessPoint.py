@@ -1,4 +1,5 @@
 # This file contains the class for each Access Point detected by sniffer in monitor mode.
+# Also contains methods for automatically starting a dot11decrypt subprocess.
 import dot11decryptprocess as d11
 
 

@@ -38,8 +38,8 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
                         if self.APlist[self.index].encryption and self.APlist[self.index].SSID and not self.APlist[self.index].password and self.APlist[self.index].passMightBeInFile:
                             password = self.APlist[self.index].getPasswordFromFile()
                             if password: # if password was found in file
-                                self.APlist[self.index].setPassword(password) # set the password and
-                                self.APlist[self.index].startInterface("wlan1mon") # start the interface
+                                self.APlist[self.index].setPassword(password) # set the password and...
+                                self.APlist[self.index].startInterface(self.interface) # ...start the interface
                             else:
                                 self.APlist[self.index].passMightBeInFile = False
 
@@ -79,6 +79,8 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
             self.stn_MAC = packet.wlan.da
         elif self.APlist[self.index].MAC == packet.wlan.ra:
             self.stn_MAC = packet.wlan.sa
+        if self.stn_MAC == "ff:ff:ff:ff:ff:ff": # if it's a broadcast frame
+            return
         self.CommPairList.append(CommPair.CommunicatingPair(self.APlist[self.index], self.stn_MAC, packet.sniff_timestamp))
 
 
