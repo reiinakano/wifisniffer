@@ -38,6 +38,7 @@ class CommunicatingPair():
 
     def decrypted_packet_received(self):
         self.decrypted_packets += 1
+        print self.decrypted_packets
 
     def pretty_print(self):
         print "Communicating pair with AP MAC " + self.AP.MAC + " and station MAC " + self.stn_MAC
