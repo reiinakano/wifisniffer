@@ -90,14 +90,18 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
 
 
     def inCommPairList(self, packet): # checks to see if AP - stn pair involved in frame is already in commpairlist. if already in list, update the parameters of the pair
+        localbssid = packet.wlan.bssid #optimize
+        localda = packet.wlan.da #optimize
+        localsa = packet.wlan.sa #optimize
         for i, comm_pair in enumerate(self.CommPairList):
-            if comm_pair.AP.MAC == packet.wlan.bssid and (comm_pair.stn_MAC == packet.wlan.da or comm_pair.stn_MAC == packet.wlan.sa):
+            if comm_pair.AP.MAC == localbssid and (comm_pair.stn_MAC == localda or comm_pair.stn_MAC == localsa):
                 self.lock.acquire()
-                self.CommPairList[i].updateTimeLastReceived(packet.sniff_time)
-                if comm_pair.stn_MAC == packet.wlan.da:
-                    self.CommPairList[i].packet_from_AP_received()
-                elif comm_pair.stn_MAC == packet.wlan.sa:
-                    self.CommPairList[i].packet_to_AP_received()
+                self.CommPairList[i].time_last_received = packet.sniff_time
+                print str(packet.sniff_time)
+                if comm_pair.stn_MAC == localda:
+                    self.CommPairList[i].packets_from_ap += 1
+                else:
+                    self.CommPairList[i].packets_to_ap += 1
                 self.lock.release()
                 #print "Updated a pair in communicating pairs list"
                 #self.CommPairList[i].pretty_print()
