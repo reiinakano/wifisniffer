@@ -12,13 +12,14 @@ class ScapySniffer(threading.Thread):
         self.CommPairList = CommPairList
 
     def run(self):
-        sniff(prn=self.perPacket, store=0)
+        sniff(iface=self.interface_string, prn=self.perPacket, store=0)
 
     def perPacket(self,packet): # This method runs whenever a packet is sniffed
         print packet.summary()
+        print packet.time
 
 if __name__ == "__main__":
     comm_pair_list = []
     lock = threading.Lock()
-    sniffer = ScapySniffer("wlan0", lock, comm_pair_list)
+    sniffer = ScapySniffer("tap0", lock, comm_pair_list)
     sniffer.start()

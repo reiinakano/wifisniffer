@@ -2,6 +2,7 @@ import pyshark
 import threading
 import AccessPoint
 import CommPair
+import scapysniffer
 
 
 class PysharkMainSniffer(threading.Thread): # This class starts the PyShark master sniffer that updates a list of communicating APs and a list of established communications
@@ -15,7 +16,7 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
 
     def run(self):
         self.cap = pyshark.LiveCapture(interface=self.interface)
-        for packet in self.cap.sniff_continuously(packet_count=100000):
+        for packet in self.cap.sniff_continuously():
             # first check what kind of packet we have. Data or WLAN_MGT?
             if packet.highest_layer == "DATA": # if packet is a data packet (remember, we're only getting communicating APs)
                 if self.inAPList(packet) is False: # If AP BSSID is not recognized, add it to APList. If already in list, do nothing
@@ -25,8 +26,7 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
                     self.lock.acquire()
                     self.append_new_comm_pair(packet)
                     self.lock.release()
-                    print "Added new pair in CommPairList"
-            if packet.highest_layer == "WLAN_MGT": # if packet is a wlan management packet (hopefully beacon)
+            elif packet.highest_layer == "WLAN_MGT": # if packet is a wlan management packet (hopefully beacon)
                 if packet.wlan.fc_subtype == "8": # this means it's a beacon frame
                     if self.inAPList(packet) is True: # If AP BSSID is recognized, try to update the AP with the SSID and encryption type
                         self.index = self.getIndexinAPList(packet)
@@ -38,8 +38,11 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
                         if self.APlist[self.index].encryption and self.APlist[self.index].SSID and not self.APlist[self.index].password and self.APlist[self.index].passMightBeInFile:
                             password = self.APlist[self.index].getPasswordFromFile()
                             if password: # if password was found in file
-                                self.APlist[self.index].setPassword(password) # set the password and...
-                                self.APlist[self.index].startInterface(self.interface) # ...start the interface
+                                self.APlist[self.index].setPassword(password)  # set the password and...
+                                self.APlist[self.index].startInterface(self.interface)  # ...start the interface
+                                if self.APlist[self.index].openInterface:  # if opened successfully...
+                                    sniffsniff = scapysniffer.ScapySniffer(self.APlist[self.index].decryptSubprocess.tap, self.lock, self.CommPairList)  # ...start scapy sniffer for this AP
+                                    sniffsniff.start()
                             else:
                                 self.APlist[self.index].passMightBeInFile = False
 
@@ -53,8 +56,9 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
             return "wep"
 
     def inAPList(self, packet): # checks to see if a WLAN frame's BSSID is in self.APlist
+        localBSSID = packet.wlan.bssid # optimize
         for access_point in self.APlist:
-            if access_point.MAC == packet.wlan.bssid:
+            if access_point.MAC == localBSSID:
                 return True
         return False
 
@@ -70,15 +74,16 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
         #print packet.wlan.ta
         #print packet.wlan.ra
         #print packet.wlan.bssid
+        localwlan = packet.wlan # optimize
         self.index = self.getIndexinAPList(packet)
-        if self.APlist[self.index].MAC == packet.wlan.sa:
-            self.stn_MAC = packet.wlan.da
-        elif self.APlist[self.index].MAC == packet.wlan.da:
-            self.stn_MAC = packet.wlan.sa
-        elif self.APlist[self.index].MAC == packet.wlan.ta:
-            self.stn_MAC = packet.wlan.da
-        elif self.APlist[self.index].MAC == packet.wlan.ra:
-            self.stn_MAC = packet.wlan.sa
+        if self.APlist[self.index].MAC == localwlan.sa:
+            self.stn_MAC = localwlan.da
+        elif self.APlist[self.index].MAC == localwlan.da:
+            self.stn_MAC = localwlan.sa
+        elif self.APlist[self.index].MAC == localwlan.ta:
+            self.stn_MAC = localwlan.da
+        elif self.APlist[self.index].MAC == localwlan.ra:
+            self.stn_MAC = localwlan.sa
         if self.stn_MAC == "ff:ff:ff:ff:ff:ff": # if it's a broadcast frame
             return
         self.CommPairList.append(CommPair.CommunicatingPair(self.APlist[self.index], self.stn_MAC, packet.sniff_timestamp))
@@ -94,8 +99,8 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
                 elif comm_pair.stn_MAC == packet.wlan.sa:
                     self.CommPairList[i].packet_to_AP_received()
                 self.lock.release()
-                print "Updated a pair in communicating pairs list"
-                self.CommPairList[i].pretty_print()
+                #print "Updated a pair in communicating pairs list"
+                #self.CommPairList[i].pretty_print()
                 return True
         return False
 
