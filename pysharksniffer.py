@@ -1,3 +1,4 @@
+import sys
 import pyshark
 import threading
 import AccessPoint
@@ -7,18 +8,40 @@ import time
 
 
 class PysharkMainSniffer(threading.Thread): # This class starts the PyShark master sniffer that updates a list of communicating APs and a list of established communications
-    def __init__(self, interface_string, lock, APlist, CommPairList):
+    def __init__(self, interface_string, lock, APlist, CommPairList, intervals=True, timeout=10, sleep=10):
         threading.Thread.__init__(self)
         self.interface = interface_string
         self.lock = lock
         self.APlist = APlist
         self.CommPairList = CommPairList
         self.cap = None
+        self._stop = threading.Event()
+        self.intervals = intervals
+        self.timeout = timeout
+        self.sleep = sleep
+
+    def stop(self):
+        self._stop.set()
+
+    def stopped(self):
+        return self._stop.isSet()
 
     def run(self):
         self.cap = pyshark.LiveCapture(interface=self.interface)
-        for packet in self.cap.sniff_continuously():
-            # first check what kind of packet we have. Data or WLAN_MGT?
+        while True:
+            try:
+                if self.intervals:
+                    self.cap.apply_on_packets(self.perPacket, timeout=self.timeout)
+                else:
+                    self.cap.apply_on_packets(self.perPacket)
+            except Exception as e:
+                print e
+                print "Timeout"
+            time.sleep(self.sleep)
+
+
+    def perPacket(self, packet):
+        # first check what kind of packet we have. Data or WLAN_MGT?
             if packet.highest_layer == "DATA": # if packet is a data packet (remember, we're only getting communicating APs)
                 if self.inAPList(packet) is False: # If AP BSSID is not recognized, add it to APList. If already in list, do nothing
                     self.APlist.append(AccessPoint.AccessPoint(packet.wlan.bssid, 1))
@@ -46,6 +69,8 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
                                     sniffsniff.start()
                             else:
                                 self.APlist[index].passMightBeInFile = False
+            if self.stopped():
+                sys.exit()
 
     def getEncryption(self, packet): # takes beacon frame as input. returns the type of encryption used.
         try:
@@ -58,7 +83,13 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
 
     def inAPList(self, packet): # checks to see if a WLAN frame's BSSID is in self.APlist
         #c = time.clock()
-        localBSSID = packet.wlan.bssid # optimize
+        try: # this is odd, creates an error sometimes that packet.wlan.bssid is an attribute error
+            localBSSID = packet.wlan.bssid # optimize
+        except Exception as e:
+            print packet
+            print e
+            sys.exit()
+            # return True # ignore
         for access_point in self.APlist:
             if access_point.MAC == localBSSID:
         #        print time.clock() - c
@@ -119,6 +150,12 @@ if __name__ == "__main__":
     lock = threading.Lock()
     APlist = []
     CommPairList = []
-    sniffer = PysharkMainSniffer("wlan1mon", lock, APlist, CommPairList)
-    print "Thread Started"
-    sniffer.start()
+    while True:
+        sniffer = PysharkMainSniffer("wlan1mon", lock, APlist, CommPairList)
+        print "Main sniffer started"
+        sniffer.start()
+        x = raw_input("sdadsa")
+        sniffer.stop()
+        sniffer.join()
+        print "Main sniffer stopped"
+        x = raw_input("sdasda")

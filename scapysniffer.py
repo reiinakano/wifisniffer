@@ -16,10 +16,6 @@ class ScapySniffer(threading.Thread):
 
     def perPacket(self,packet): # This method runs whenever a packet is sniffed
         print packet.summary()
-        #if packet.haslayer(Ether):
-        #    print packet[Ether].dst
-        #    print packet[Ether].src
-        #return
         index = self.getIndexinCPList(packet)
         #if index is not None:
         #    print "huhhh"
@@ -34,7 +30,7 @@ class ScapySniffer(threading.Thread):
                 self.CommPairList[index].decrypted_packet_received()
                 self.lock.release()
                 return index
-        print "Something wrong if you see this."
+        print "This isn't associated with a particular station"
         return None
 
 if __name__ == "__main__":
