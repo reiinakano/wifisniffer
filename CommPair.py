@@ -10,8 +10,11 @@ class CommunicatingPair():
         self.channel = self.AP.channel
         self.stn_name = stn_name
         self.decrypted_packets = 0
+        self.time_last_decrypted = None
         self.packets_from_AP = 0
         self.packets_to_AP = 0
+        self.IP_addresses_and_ports_talked_to = set([])
+        self.DNS_queries = set([])
         print "Instantiated communicating pair with AP MAC " + self.AP.MAC + " and station MAC " + self.stn_MAC
 
     def deauthenticate(self): # This method deauthenticates station MAC (using aireplay-ng) in order to try to capture the EAPOL handshake
@@ -45,6 +48,7 @@ class CommunicatingPair():
         print "Time last received: " + str(self.time_last_received)
         print "Packets from AP: " + str(self.packets_from_AP)
         print "Packets to AP:" + str(self.packets_to_AP)
+
 
 if __name__ == '__main__':
     access_point = AP.AccessPoint("wpa", "mySSID2", "10:20:30:40:50:60", 1)
