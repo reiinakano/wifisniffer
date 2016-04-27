@@ -122,7 +122,7 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
             self.stn_MAC = localwlan.sa
         if self.stn_MAC == "ff:ff:ff:ff:ff:ff": # if it's a broadcast frame
             return
-        self.CommPairList.append(CommPair.CommunicatingPair(self.APlist[index], self.stn_MAC, packet.sniff_timestamp))
+        self.CommPairList.append(CommPair.CommunicatingPair(self.APlist[index], self.stn_MAC, packet.sniff_time))
 
 
     def inCommPairList(self, packet): # checks to see if AP - stn pair involved in frame is already in commpairlist. if already in list, update the parameters of the pair
