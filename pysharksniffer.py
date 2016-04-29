@@ -19,6 +19,7 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
         self.intervals = intervals
         self.timeout = timeout
         self.sleep = sleep
+        self.on = False
 
     def stop(self):
         self._stop.set()
@@ -30,6 +31,7 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
         self.cap = pyshark.LiveCapture(interface=self.interface)
         while True:
             try:
+                self.on = True
                 if self.intervals:
                     self.cap.apply_on_packets(self.perPacket, timeout=self.timeout)
                 else:
@@ -37,6 +39,7 @@ class PysharkMainSniffer(threading.Thread): # This class starts the PyShark mast
             except Exception as e:
                 print e
                 print "Timeout"
+                self.on = False
             time.sleep(self.sleep)
 
 

@@ -6,27 +6,30 @@ import threading
 
 class MyGUI(Frame):
 
-    def __init__(self, parent, APList, CommPairList):
+    def __init__(self, parent, APList, CommPairList, sniffer):
         Frame.__init__(self, parent)
 
         self.parent = parent
         self.APList = APList
         self.CommPairList = CommPairList
+        self.main_sniffer = sniffer
         self.initUI()
         self.updateData()
 
 
     def initUI(self):
 
-        self.parent.geometry("1200x800+100+100")
+        self.parent.geometry("1200x900+100+100")
         self.parent.title("reii")
         self.init_AP_Frame()
         self.init_CommPair_Frame()
+        self.init_DNS_Frame()
+        self.init_Main_Sniffer_Status_Frame()
 
 
     def init_CommPair_Frame(self):
-        self.CommPair_Frame = Frame(self.parent)
-        self.CommPair_Frame.grid(row=1, column=0)
+        self.CommPair_Frame = LabelFrame(self.parent, text="Communicating Pairs")
+        self.CommPair_Frame.grid(row=1, column=0, pady=10, padx=10)
 
         self.CP_AP_selected = Label(self.CommPair_Frame, text=0, textvariable=self.AP_selected_text)
         self.CP_AP_selected.grid(padx=5, pady=5)
@@ -92,8 +95,8 @@ class MyGUI(Frame):
 
     def init_AP_Frame(self):
 
-        self.AP_Frame = Frame(self.parent)
-        self.AP_Frame.grid()
+        self.AP_Frame = LabelFrame(self.parent, text="Access Points")
+        self.AP_Frame.grid(pady=10, padx=10)
 
         self.AP_selected_text = StringVar()
         self.AP_selected = Label(self.AP_Frame, text=0, textvariable=self.AP_selected_text)
@@ -136,6 +139,42 @@ class MyGUI(Frame):
         self.AP_Process_text = StringVar()
         self.AP_Process = Label(self.AP_Frame, text="Decrypting: ", width=30, textvariable=self.AP_Process_text, anchor=W)
         self.AP_Process.grid(row=6, column=3, padx=5, sticky=W)
+
+    def init_DNS_Frame(self):
+        self.DNS_Frame = LabelFrame(self.parent, text="DNS Monitoring")
+        self.DNS_Frame.grid(row=2, pady=10, padx=10)
+
+        self.DNS_listbox = Listbox(self.DNS_Frame, width=30, height=20)
+        self.DNS_listbox.grid(row=0, padx=5, rowspan=10)
+        self.DNS_listbox.bind("<<ListboxSelect>>", self.onSelectDNS)
+
+        self.DNS_listbox_scrollbar = Scrollbar(self.DNS_Frame, orient=VERTICAL)
+        self.DNS_listbox.config(yscrollcommand=self.DNS_listbox_scrollbar.set)
+        self.DNS_listbox_scrollbar.config(command=self.DNS_listbox.yview)
+        self.DNS_listbox_scrollbar.grid(row=0, column=1, rowspan=10, sticky = 'ns')
+
+        self.description = Text(self.DNS_Frame, width=70, height=20)
+        self.description.grid(row=0, column=2, padx=5, pady=5)
+
+    def init_Main_Sniffer_Status_Frame(self):
+        self.Main_Sniffer_Status_Frame = LabelFrame(self.parent, text="Main Sniffer Status")
+        self.Main_Sniffer_Status_Frame.grid(padx=20, row=0, column=1)
+
+        self.intervals_text = StringVar()
+        self.intervals = Label(self.Main_Sniffer_Status_Frame, textvariable=self.intervals_text)
+        self.intervals.grid()
+
+        self.sniff_duration_text = StringVar()
+        self.sniff_duration = Label(self.Main_Sniffer_Status_Frame, textvariable=self.sniff_duration_text)
+        self.sniff_duration.grid(row=1)
+
+        self.sleep_duration_text = StringVar()
+        self.sleep_duration = Label(self.Main_Sniffer_Status_Frame, textvariable=self.sleep_duration_text)
+        self.sleep_duration.grid(row=2)
+
+        self.sniff_status_text = StringVar()
+        self.sniff_status = Label(self.Main_Sniffer_Status_Frame, textvariable=self.sniff_status_text)
+        self.sniff_status.grid(row=3, pady=10)
 
 
     def onSelectAP(self, val):
@@ -271,7 +310,24 @@ class MyGUI(Frame):
         except Exception as e:
             print e
 
+        if self.main_sniffer.intervals:
+            self.intervals_text.set("Intervals: True")
+            self.sniff_duration_text.set("Sniffing Duration: " + str(self.main_sniffer.timeout) + " seconds")
+            self.sleep_duration_text.set("Sleeping Duration: " + str(self.main_sniffer.sleep) + " seconds")
+        else:
+            self.intervals_text.set("Intervals: False")
+            self.sniff_duration_text.set("Sniffing Duration: Irrelevant")
+            self.sleep_duration_text.set("Sleeping Duration: Irrelevant")
+
+        if self.main_sniffer.on:
+            self.sniff_status_text.set("Currently: ON")
+        else:
+            self.sniff_status_text.set("Currently: OFF")
+
         self.parent.after(1000, self.updateData)
+
+    def onSelectDNS(self, val):
+        pass
 
 
 def main():
@@ -284,7 +340,7 @@ def main():
     print "Main sniffer started"
     sniffer.start()
     root = Tk()
-    app = MyGUI(root, APList, CommPairList)
+    app = MyGUI(root, APList, CommPairList, sniffer)
     root.mainloop()
 
 
