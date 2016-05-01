@@ -188,6 +188,7 @@ class MyGUI(Frame):
         numIndex = index[0]
         self.index_selected_AP = numIndex
         self.index_selected_CP = 0
+        self.value_selected_DNS = "Unclassified"
 
         self.updateAPDetails(numIndex)
 
@@ -237,6 +238,7 @@ class MyGUI(Frame):
         value = sender.get(index)
         self.CP_stn_selected_text.set("Station: " + value)
         self.index_selected_CP = index[0]
+        self.value_selected_DNS = "Unclassified"
 
         numIndex = self.CP_indexes[index[0]]
         self.updateCPDetails(numIndex)
@@ -292,8 +294,11 @@ class MyGUI(Frame):
         sender = val.widget
         index = sender.curselection()
         value = sender.get(index)
+        self.value_selected_DNS = value
+        self.updateDNSTextbox(value)
+
+    def updateDNSTextbox(self, value):
         numIndex = self.CP_indexes[self.index_selected_CP]
-        # delete textbox yo
         self.description.delete(1.0, END)
         for query in self.CommPairList[numIndex].DNS_queries:
             if self.db.get_site_of_DNS_query(query) == value:
@@ -354,6 +359,12 @@ class MyGUI(Frame):
             self.updateDNSSites(self.CP_indexes[self.index_selected_CP])
         except Exception as e:
             print e
+
+        try:
+            self.updateDNSTextbox(self.value_selected_DNS)
+        except Exception as e:
+            print e
+
 
         if self.main_sniffer.intervals:
             self.intervals_text.set("Intervals: True")
