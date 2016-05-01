@@ -174,6 +174,15 @@ class DNS_Database():
             self.db.rollback()
             return 1 # Weird Error
 
+    def get_site_of_DNS_query(self, query):
+        sql = """SELECT SITES.name FROM SITES
+         JOIN DNS_QRY ON SITES.siteID = DNS_QRY.site
+         WHERE DNS_QRY.name='%s'""" % query
+        self.cursor.execute(sql)
+        data = self.cursor.fetchall()
+        print data[0][0]
+        return data[0][0]
+
     def reclassify_DNS_query(self, query, site): # Reclassifies existing query 'query' under 'site'
         siteID = self.get_siteID(site)
         if siteID == -1:
@@ -292,4 +301,5 @@ if __name__ == "__main__":
     db.change_site_description("Github", "Social media site.")
     db.add_query_description("www.reddit.com", "Main site of Redit")
     db.change_query_description("www.reddit.com", "Main site of Reddit")
+    db.get_site_of_DNS_query("www.reddit.com")
     db.close_database()

@@ -2,17 +2,19 @@ from Tkinter import *
 import AccessPoint
 import pysharksniffer as pss
 import threading
+import DNS_Database as DB
 
 
 class MyGUI(Frame):
 
-    def __init__(self, parent, APList, CommPairList, sniffer):
+    def __init__(self, parent, APList, CommPairList, sniffer, database):
         Frame.__init__(self, parent)
 
         self.parent = parent
         self.APList = APList
         self.CommPairList = CommPairList
         self.main_sniffer = sniffer
+        self.db = database
         self.initUI()
         self.updateData()
 
@@ -185,6 +187,7 @@ class MyGUI(Frame):
 
         numIndex = index[0]
         self.index_selected_AP = numIndex
+        self.index_selected_CP = 0
 
         self.updateAPDetails(numIndex)
 
@@ -233,9 +236,11 @@ class MyGUI(Frame):
         index = sender.curselection()
         value = sender.get(index)
         self.CP_stn_selected_text.set("Station: " + value)
+        self.index_selected_CP = index[0]
 
         numIndex = self.CP_indexes[index[0]]
         self.updateCPDetails(numIndex)
+        self.updateDNSSites(numIndex)
 
     def updateCPDetails(self, numIndex):
 
@@ -259,6 +264,41 @@ class MyGUI(Frame):
         else:
             self.CP_last_decrypted_text.set("Last Decryption: Never")
 
+    def updateDNSSites(self, numIndex):
+        index = self.DNS_listbox.curselection()
+        self.DNS_listbox.delete(0, END)
+        self.DNS_listbox.insert(END, "Unclassified")
+        temp = ["Unclassified"]
+        for query in self.CommPairList[numIndex].DNS_queries:
+            if self.db.check_DNS_query(query): # If query already exists in database
+                site = self.db.get_site_of_DNS_query(query)
+                if site in temp:
+                    pass
+                else:
+                    temp.append(site)
+                    self.DNS_listbox.insert(END, site)
+            else: # If query is something new
+                self.db.add_DNS_query(query)
+
+        try:
+            self.DNS_listbox.selection_set(index)
+            self.DNS_listbox.see(index)
+            self.DNS_listbox.activate(index)
+        except Exception as e:
+            print e
+
+
+    def onSelectDNS(self, val):
+        sender = val.widget
+        index = sender.curselection()
+        value = sender.get(index)
+        numIndex = self.CP_indexes[self.index_selected_CP]
+        # delete textbox yo
+        self.description.delete(1.0, END)
+        for query in self.CommPairList[numIndex].DNS_queries:
+            if self.db.get_site_of_DNS_query(query) == value:
+                # edit textbox here
+                self.description.insert(END, query + "\n")
 
 
     def updateData(self): # This method refreshes all data
@@ -306,7 +346,12 @@ class MyGUI(Frame):
             print e
 
         try:
-            self.updateCPDetails(self.CP_indexes[current_index[0]])
+            self.updateCPDetails(self.CP_indexes[self.index_selected_CP])
+        except Exception as e:
+            print e
+
+        try:
+            self.updateDNSSites(self.CP_indexes[self.index_selected_CP])
         except Exception as e:
             print e
 
@@ -326,21 +371,19 @@ class MyGUI(Frame):
 
         self.parent.after(1000, self.updateData)
 
-    def onSelectDNS(self, val):
-        pass
-
-
 def main():
     APList = []
     CommPairList = []
     lock = threading.Lock()
+
     #APList.append(AccessPoint.AccessPoint("00:00:00:00:00:00", 1))
     #APList.append(AccessPoint.AccessPoint("00:01:02:03:04:05", 2, "myssidddd"))
+    db = DB.DNS_Database()
     sniffer = pss.PysharkMainSniffer("wlan1mon", lock, APList, CommPairList)
     print "Main sniffer started"
     sniffer.start()
     root = Tk()
-    app = MyGUI(root, APList, CommPairList, sniffer)
+    app = MyGUI(root, APList, CommPairList, sniffer, db)
     root.mainloop()
 
 

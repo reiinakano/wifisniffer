@@ -54,7 +54,8 @@ class ScapySniffer(threading.Thread):
 
     def DNSquery(self, packet, index):
         if packet.haslayer(DNSQR):
-            self.CommPairList[index].DNS_queries.add(packet[DNSQR].qname)
+            if packet[DNSQR].qname not in self.CommPairList[index].DNS_queries:
+                self.CommPairList[index].DNS_queries.append(packet[DNSQR].qname)
             print self.CommPairList[index].DNS_queries
 
 

@@ -14,7 +14,7 @@ class CommunicatingPair():
         self.packets_from_AP = 0
         self.packets_to_AP = 0
         self.IP_addresses_and_ports_talked_to = set([])
-        self.DNS_queries = set([])
+        self.DNS_queries = []
         print "Instantiated communicating pair with AP MAC " + self.AP.MAC + " and station MAC " + self.stn_MAC
 
     def deauthenticate(self): # This method deauthenticates station MAC (using aireplay-ng) in order to try to capture the EAPOL handshake
